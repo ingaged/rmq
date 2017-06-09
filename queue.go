@@ -99,6 +99,17 @@ func (queue *redisQueue) PublishBytes(payload []byte) bool {
 	return queue.Publish(string(payload))
 }
 
+// Publish adds a delivery with the given payload to the queue
+func (queue *redisQueue) PublishTop(payload string) bool {
+	// debug(fmt.Sprintf("publish %s %s", payload, queue)) // COMMENTOUT
+	return !redisErrIsNil(queue.redisClient.RPush(queue.readyKey, payload))
+}
+
+// PublishBytes just casts the bytes and calls Publish
+func (queue *redisQueue) PublishBytesTop(payload []byte) bool {
+	return queue.PublishTop(string(payload))
+}
+
 // PurgeReady removes all ready deliveries from the queue and returns the number of purged deliveries
 func (queue *redisQueue) PurgeReady() int {
 	return queue.deleteRedisList(queue.readyKey)
